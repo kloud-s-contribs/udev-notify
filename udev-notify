@@ -85,8 +85,9 @@ get_device_icon() {
 }
 
 show_visual_notification() {
-   local header="$1"
-   local text="$2"
+   local title="$1"
+   local header="$2"
+   local text="$3"
    if [ "$notification_icons" == "true" ]
       then
           get_device_icon "$2"
@@ -106,7 +107,7 @@ show_visual_notification() {
          export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$cur_user_id/bus"
          export DISPLAY="$(who|grep "$cur_user"|grep 'tty' -m1|grep -o '(.*)$'|sed 's/(//;s/)//')"
          export XAUTHORITY="/home/$cur_user/.Xauthority"
-         su "$cur_user" -c "notify-send -i '$dev_icon' '$header' '$text'"
+         su "$cur_user" -c "notify-send -i '$dev_icon' -a '$title' '$header' '$text'"
    done
 }
 
@@ -142,7 +143,7 @@ notify_plugged() {
    local dev_verbose="$3"
    if [ "$show_notifications" == "true" ]
       then
-          show_visual_notification "$iProduct plugged in###($dev_name)" "$dev_verbose"
+          show_visual_notification "$iProduct plugged in" "$dev_name" "$dev_verbose"
    fi
 
    if [ "$play_sounds" == "true" ]
@@ -157,7 +158,7 @@ notify_unplugged() {
    local dev_verbose="$3"
    if [ "$show_notifications" == "true" ]
       then
-          show_visual_notification "$iProduct unplugged###($dev_name)" "$dev_verbose"
+          show_visual_notification "$iProduct unplugged" "$dev_name" "$dev_verbose"
    fi
 
    if [ "$play_sounds" == "true" ]
