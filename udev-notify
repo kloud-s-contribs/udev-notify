@@ -8,7 +8,7 @@ lock_file="/tmp/udev-notify-devices.lock"
 plug_sound_path="$sounds_dir/plug_sound.wav"
 unplug_sound_path="$sounds_dir/unplug_sound.wav"
 config_file="/etc/udev-notify.conf"
-ignored_devices="/etc/udev-notify-ignored.devices"
+ignored_devices_file="/etc/udev-notify-ignored.devices"
 
 show_notifications="true"
 notification_icons="true"
@@ -272,9 +272,11 @@ sanitize_dev_name() {
 
                 escaped_dev_path="$(echo "$dev_path"|sed 's/[\/&*.^$]/\\\&/g')"
                 sed -i "s#^\([0-9]\{3\}:\)\{2\}\($escaped_dev_path\)#$bus_num:$dev_num:$dev_path#" "$devlist_file"
-                existing_dev_on_bus_cnt="$(cat "$devlist_file"|grep "^$bus_num:$dev_num:"|awk 'END {print NR}')"
 
-                if [ "$existing_dev_on_bus_cnt" == "0" ]; then
+                existing_dev_on_bus_cnt="$(cat "$devlist_file" | grep "^$bus_num:$dev_num:" | awk 'END {print NR}')"
+                ignored_device="$(cat "$ignored_devices_file" | grep "$vp_id" | awk 'END {print NR}')"
+
+                if [[ "$existing_dev_on_bus_cnt" == "0" && "$ignored_device" == "0" ]]; then
                     echo "$bus_num:$dev_num:$dev_path name=\"$dev_name\"" >> "$devlist_file"
                     echo "$bus_num:$dev_num:$dev_path iProduct=\"$iProduct\"" >> "$devlist_file"
                     echo "$bus_num:$dev_num:$dev_path verbose=\"$dev_verbose\"" >> "$devlist_file"
